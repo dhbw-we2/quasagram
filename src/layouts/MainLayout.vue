@@ -30,22 +30,37 @@
           round
           dense
         />
-        <q-btn v-if="!isRegistered"
-          to="/register"
-          title="Register"
+        <q-separator
           class="large-screen-only"
-          icon="eva-person-add-outline"
-          flat
-          round
-          dense
+          spaced
+          vertical
         />
-        <q-btn v-else
-          title="Logout"
-          class="large-screen-only"
-          icon="eva-log-out-outline"
-          flat
-          round
-          dense
+
+        <q-btn v-if="!isLoggedIn"
+               to="/login"
+               class="large-screen-only"
+               dense
+               flat
+               icon="eva-log-in-outline"
+               round
+               title="Login"
+        />
+        <q-btn v-if="!isRegistered"
+               to="/register"
+               class="large-screen-only"
+               dense
+               flat
+               icon="eva-person-add-outline"
+               round
+               title="Register"
+        />
+        <q-btn v-if="isRegistered && isLoggedIn"
+               title="Logout"
+               class="large-screen-only"
+               dense
+               flat
+               icon="eva-log-out-outline"
+               round
         />
       </q-toolbar>
     </q-header>
@@ -70,7 +85,9 @@
     </q-footer>
 
     <q-page-container class="bg-grey-1">
-      <router-view/>
+      <router-view
+        @user-logged-in="isLoggedInData=true"
+        @user-registered="isRegisteredData=true"/>
     </q-page-container>
   </q-layout>
 </template>
@@ -82,14 +99,23 @@ export default {
   name: 'MainLayout',
 
   data() {
-    return {}
-  },
-  computed: {
-    isRegistered: function() {
-      const registered = sessionStorage.getItem(CONST.REGISTERED)
-      return registered? JSON.parse(registered.toLowerCase()) : false
+    return {
+      isLoggedInData: false,
+      isRegisteredData: false,
     }
-  }
+  },
+    computed: {
+      isRegistered: function() {
+        const registered = localStorage.getItem(CONST.REGISTERED)
+        const result = registered? JSON.parse(registered.toLowerCase()) : false
+        return this.isRegisteredData || result
+      },
+      isLoggedIn: function() {
+        const loggedIn = sessionStorage.getItem(CONST.LOGIN)
+        const result = loggedIn? JSON.parse(loggedIn.toLowerCase()) : false
+        return this.isLoggedInData || result
+      }
+    }
 
 }
 </script>
@@ -103,6 +129,9 @@ export default {
   font-size: 30px
   @media (max-width: $breakpoint-xs-max)
     text-align: center
+
+.q-toolbar a
+  font-size: 18px
 
 .q-footer
   .q-tab__icon

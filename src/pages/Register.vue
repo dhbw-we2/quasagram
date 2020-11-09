@@ -53,14 +53,14 @@
           label="Register new user"
           rounded
         />
-        <br/>
       </q-form>
     </div>
   </q-page>
 </template>
 
 <script>
-import {db, auth, REGISTERED} from 'boot/firebase'
+import CONST from 'boot/constants'
+import {db, auth} from 'boot/firebase'
 
 export default {
   name: 'Register',
@@ -79,7 +79,7 @@ export default {
       auth.createUserWithEmailAndPassword(this.email, this.password).then(userCredentials => {
           this.createUserinDB(userCredentials.user.uid)
         }).catch(error => {
-          this.$q.dialog({title: 'Error', message: error.message})
+          this.$q.dialog({title: 'Error registering user', message: error.message})
       })
     },
     async createUserinDB(userId) {
@@ -90,11 +90,12 @@ export default {
           nickname: this.nickname,
           nickname_lower: this.nickname.toLowerCase()
         }).then(() => {
-          sessionStorage.setItem(REGISTERED, true)
+          localStorage.setItem(CONST.REGISTERED, true)
           this.$q.dialog({ title: 'Success', message: 'User registered' })
+          this.$emit(CONST.REGISTERED)
           this.$router.push('/')
         }).catch(error => {
-          this.$q.dialog({ title: 'Error generating user', message: error.message })
+          this.$q.dialog({ title: 'Error generating user data', message: error.message })
         })
       } else {
         this.$q.dialog({ title: 'Error', message: 'User already exists' })

@@ -1,5 +1,5 @@
 const CONST = {
-    REGISTERED: 'userRegistered',
-    LOGIN: 'userLoggedIn'
+    REGISTERED: 'user-registered',
+    LOGIN: 'user-logged-in'
 }
 export default CONST
