@@ -33,5 +33,4 @@ yarn-error.log*
 *.sln
 
 # don't commit secret key!
-/backend/serviceAccountKey.json
 /src/boot/secretConfig.json
