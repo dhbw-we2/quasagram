@@ -1,7 +1,7 @@
 <template>
   <q-page class="constrain-more q-pa-md">
     <div class="camera-frame q-pa-md">
-      <video 
+      <video
         v-show="!imageCaptured"
         ref="video"
         class="full-width"
@@ -15,16 +15,15 @@
       />
     </div>
     <div class="text-center q-pa-md">
-      <q-btn
-        v-if="hasCameraSupport"
+      <q-btn v-if="hasCameraSupport"
         @click="captureImage"
+        :disable="imageCaptured"
         color="grey-10"
         icon="eva-camera"
         size="lg"
         round
       />
-      <q-file
-        v-else
+      <q-file v-else
         v-model="imageUpload"
         @input="captureImageFallback"
         label="Choose an image"
@@ -32,14 +31,14 @@
         outlined
       >
         <template v-slot:prepend>
-          <q-icon name="eva-attach-outline" />
+          <q-icon name="eva-attach-outline"/>
         </template>
       </q-file>
       <div class="row justify-center q-ma-md">
         <q-input
           v-model="post.caption"
           class="col col-sm-6"
-          label="Caption"
+          label="Caption *"
           dense
         />
       </div>
@@ -65,6 +64,8 @@
       </div>
       <div class="row justify-center q-mt-lg">
         <q-btn
+          @click="uploadImage()"
+          :disable="!post.caption || !post.photo"
           color="primary"
           label="Post Image"
           rounded
@@ -76,8 +77,10 @@
 </template>
 
 <script>
-import { uid } from 'quasar'
+import {uid} from 'quasar'
+
 require('md-gum-polyfill')
+import {db, storage} from 'boot/firebase'
 
 export default {
   name: 'PageCamera',
@@ -135,7 +138,7 @@ export default {
         img.onload = () => {
           canvas.width = img.width
           canvas.height = img.height
-          context.drawImage(img,0,0)
+          context.drawImage(img, 0, 0)
           this.imageCaptured = true
         }
         img.src = event.target.result
@@ -163,7 +166,7 @@ export default {
 
       // set the bytes of the buffer to the correct values
       for (var i = 0; i < byteString.length; i++) {
-          ia[i] = byteString.charCodeAt(i);
+        ia[i] = byteString.charCodeAt(i);
       }
 
       // write the ArrayBuffer to a blob, and you're done
@@ -177,10 +180,10 @@ export default {
         this.getCityAndCountry(position)
       }, err => {
         this.locationError()
-      }, { timeout: 7000 })
+      }, {timeout: 7000})
     },
     getCityAndCountry(position) {
-      let apiUrl = `https://geocode.xyz/${ position.coords.latitude },${ position.coords.longitude }?json=1`
+      let apiUrl = `https://geocode.xyz/${position.coords.latitude},${position.coords.longitude}?json=1`
       this.$axios.get(apiUrl).then(result => {
         this.locationSuccess(result)
       }).catch(err => {
@@ -190,7 +193,7 @@ export default {
     locationSuccess(result) {
       this.post.location = result.data.city
       if (result.data.country) {
-        this.post.location += `, ${ result.data.country }`
+        this.post.location += `, ${result.data.country}`
       }
       this.locationLoading = false
     },
@@ -200,6 +203,33 @@ export default {
         message: 'Could not find your location.'
       })
       this.locationLoading = false
+    },
+    uploadImage() {
+      this.$q.loading.show()
+      const fileName = this.post.photo.name || this.post.id + '.png'
+      let imageRef = storage.child('posts/' + fileName)
+      imageRef.put(this.post.photo).then((snapshot) => {
+        this.createPost(snapshot.ref.location, this.post)
+      }).catch(err => {
+        this.$q.dialog({ title: 'Error uploading image', message: err.message })
+      })
+      this.$q.loading.hide()
+    },
+    createPost(file, post) {
+      db.collection('posts').doc(post.id).set({
+        id: post.id,
+        caption: post.caption,
+        location: post.location,
+        date: parseInt(post.date),
+        imageUrl: `https://firebasestorage.googleapis.com/v0/b/${file.bucket}/o/${encodeURIComponent(file.path)}?alt=media&token=${post.id}`
+      }).then(() => {
+        this.$router.push('/')
+        this.$q.notify({ message: 'Post created!', actions: [{ label: 'Dismiss', color: 'white' }] })
+
+      }).catch(err => {
+        console.log('err: ', err)
+        this.$q.dialog({ title: 'Error generating post', message: err.message })
+      })
     }
   },
   mounted() {
@@ -214,7 +244,7 @@ export default {
 </script>
 
 <style lang="sass">
-  .camera-frame
-    border: 2px solid $grey-10
-    border-radius: 10px
+.camera-frame
+  border: 2px solid $grey-10
+  border-radius: 10px
 </style>

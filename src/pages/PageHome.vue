@@ -93,7 +93,7 @@
 
 <script>
 import {date} from 'quasar'
-import $fb from 'boot/firebaseInit'
+import {db} from 'boot/firebase'
 
 export default {
   name: 'PageHome',
@@ -106,7 +106,7 @@ export default {
   methods: {
     getPosts() {
       this.loadingPosts = true
-      $fb.db.collection('posts').orderBy('date', 'desc').get().then(snapshot => {
+      db.collection('posts').orderBy('date', 'desc').get().then(snapshot => {
         snapshot.forEach((doc) => {
           this.posts.push(doc.data())
         })
