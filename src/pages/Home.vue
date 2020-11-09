@@ -7,8 +7,8 @@
           <q-card
             v-for="post in posts"
             :key="post.id"
-            class="card-post q-mb-md"
             bordered
+            class="card-post q-mb-md"
             flat
           >
             <q-item>
@@ -28,8 +28,8 @@
 
             <q-separator/>
 
-            <q-img height="50%"
-                   :src="post.imageUrl"
+            <q-img :src="post.imageUrl"
+                   height="50%"
             />
 
             <q-card-section>
@@ -46,24 +46,24 @@
           <q-card bordered>
             <q-item>
               <q-item-section avatar>
-                <q-skeleton type="QAvatar" animation="fade" size="40px"/>
+                <q-skeleton animation="fade" size="40px" type="QAvatar"/>
               </q-item-section>
 
               <q-item-section>
                 <q-item-label>
-                  <q-skeleton type="text" animation="fade"/>
+                  <q-skeleton animation="fade" type="text"/>
                 </q-item-label>
                 <q-item-label caption>
-                  <q-skeleton type="text" animation="fade"/>
+                  <q-skeleton animation="fade" type="text"/>
                 </q-item-label>
               </q-item-section>
             </q-item>
 
-            <q-skeleton height="200px" square animation="fade"/>
+            <q-skeleton animation="fade" height="200px" square/>
 
             <q-card-section>
-              <q-skeleton type="text" class="text-subtitle2" animation="fade"/>
-              <q-skeleton type="text" width="50%" class="text-subtitle2" animation="fade"/>
+              <q-skeleton animation="fade" class="text-subtitle2" type="text"/>
+              <q-skeleton animation="fade" class="text-subtitle2" type="text" width="50%"/>
             </q-card-section>
           </q-card>
         </template>
@@ -79,10 +79,9 @@
           </q-item-section>
 
           <q-item-section>
-            <q-item-label class="text-bold">artingo</q-item-label>
+            <q-item-label class="text-bold">{{ user.nickname }}</q-item-label>
             <q-item-label caption>
-              Fred Walther<br/>
-              userId: {{userId}}
+              {{user.email}}<br/>
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -94,30 +93,47 @@
 
 <script>
 import {date} from 'quasar'
-import {db} from 'boot/firebase'
+import {db, auth} from 'boot/firebase'
 
 export default {
   name: 'Home',
-  props: ['userId'],
   data() {
     return {
+      user: {},
       posts: [],
       loadingPosts: false
     }
   },
   methods: {
+    getUser() {
+      if (!auth.currentUser) return
+      db.collection('users')
+        .where('userId', '==', auth.currentUser.uid).limit(1).get()
+        .then(snapshot => {
+          if (!snapshot.empty) {
+            this.user = snapshot.docs[0].data()
+            this.user.email = auth.currentUser.email
+          }
+        }).catch(error => {
+        this.$q.dialog({ title: error.code, message: error.message })
+      })
+
+    },
     getPosts() {
+      if (!auth.currentUser) return
       this.loadingPosts = true
-      db.collection('posts').orderBy('date', 'desc').get().then(snapshot => {
-        snapshot.forEach((doc) => {
-          this.posts.push(doc.data())
-        })
-        this.loadingPosts = false
-      }).catch(error => {
+      db.collection('posts').get()
+        .then(posts => {
+          if (!posts.empty) {
+            posts.forEach((doc) => {
+              this.posts.push(doc.data())
+            })
+            this.loadingPosts = false
+          }
+        }).catch(error => {
         this.$q.dialog({ title: error.code, message: error.message })
         this.loadingPosts = false
       })
-
     }
   },
   filters: {
@@ -126,6 +142,7 @@ export default {
     }
   },
   created() {
+    this.getUser()
     this.getPosts()
   }
 }

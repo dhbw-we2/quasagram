@@ -4,8 +4,8 @@
       <video
         v-show="!imageCaptured"
         ref="video"
-        class="full-width"
         autoplay
+        class="full-width"
       />
       <canvas
         v-show="imageCaptured"
@@ -16,19 +16,19 @@
     </div>
     <div class="text-center q-pa-md">
       <q-btn v-if="hasCameraSupport"
-        @click="captureImage"
-        :disable="imageCaptured"
-        color="grey-10"
-        icon="eva-camera"
-        size="lg"
-        round
+             :disable="imageCaptured"
+             color="grey-10"
+             icon="eva-camera"
+             round
+             size="lg"
+             @click="captureImage"
       />
       <q-file v-else
-        v-model="imageUpload"
-        @input="captureImageFallback"
-        label="Choose an image"
-        accept="image/*"
-        outlined
+              v-model="imageUpload"
+              accept="image/*"
+              label="Choose an image"
+              outlined
+              @input="captureImageFallback"
       >
         <template v-slot:prepend>
           <q-icon name="eva-attach-outline"/>
@@ -38,8 +38,8 @@
         <q-input
           v-model="post.caption"
           class="col col-sm-6"
-          label="Caption *"
           dense
+          label="Caption *"
         />
       </div>
       <div class="row justify-center q-ma-md">
@@ -47,29 +47,29 @@
           v-model="post.location"
           :loading="locationLoading"
           class="col col-sm-6"
-          label="Location"
           dense
+          label="Location"
         >
           <template v-slot:append>
             <q-btn
               v-if="!locationLoading && locationSupported"
-              @click="getLocation"
-              icon="eva-navigation-2-outline"
               dense
               flat
+              icon="eva-navigation-2-outline"
               round
+              @click="getLocation"
             />
           </template>
         </q-input>
       </div>
       <div class="row justify-center q-mt-lg">
         <q-btn
-          @click="uploadImage()"
           :disable="!post.caption || !post.photo"
           color="primary"
           label="Post Image"
           rounded
           unelevated
+          @click="uploadImage()"
         />
       </div>
     </div>
@@ -80,7 +80,7 @@
 import {uid} from 'quasar'
 
 require('md-gum-polyfill')
-import {db, storage} from 'boot/firebase'
+import {db, auth, storage} from 'boot/firebase'
 
 export default {
   name: 'Camera',
@@ -146,9 +146,11 @@ export default {
       reader.readAsDataURL(file)
     },
     disableCamera() {
-      this.$refs.video.srcObject.getVideoTracks().forEach(track => {
-        track.stop()
-      })
+      if (this.$refs.video.srcObject) {
+        this.$refs.video.srcObject.getVideoTracks().forEach(track => {
+          track.stop()
+        })
+      }
     },
     dataURItoBlob(dataURI) {
       // convert base64 to raw binary data held in a string
@@ -205,13 +207,14 @@ export default {
       this.locationLoading = false
     },
     uploadImage() {
+      if (!auth.currentUser) return
       this.$q.loading.show()
       const fileName = this.post.photo.name || this.post.id + '.png'
       let imageRef = storage.child('posts/' + fileName)
       imageRef.put(this.post.photo).then((snapshot) => {
         this.createPost(snapshot.ref.location, this.post)
       }).catch(err => {
-        this.$q.dialog({ title: 'Error uploading image', message: err.message })
+        this.$q.dialog({title: 'Error uploading image', message: err.message})
       })
       this.$q.loading.hide()
     },
@@ -221,16 +224,24 @@ export default {
         caption: post.caption,
         location: post.location,
         date: parseInt(post.date),
+        userId: auth.currentUser.uid,
         imageUrl: `https://firebasestorage.googleapis.com/v0/b/${file.bucket}/o/${encodeURIComponent(file.path)}?alt=media&token=${post.id}`
       }).then(() => {
         this.$router.push('/')
-        this.$q.notify({ message: 'Post created!', actions: [{ label: 'Dismiss', color: 'white' }] })
+        this.$q.notify({message: 'Post created!', actions: [{label: 'Dismiss', color: 'white'}]})
       }).catch(err => {
-        this.$q.dialog({ title: 'Error generating post', message: err.message })
+        this.$q.dialog({title: 'Error generating post', message: err.message})
       })
     }
   },
   mounted() {
+    if (!auth.currentUser) {
+      this.$q.dialog({title: 'Unauthorized', message: 'Your are not logged in'})
+      setTimeout(() => {
+        this.$router.push('/')
+      }, 1000)
+      return
+    }
     this.initCamera()
   },
   beforeDestroy() {

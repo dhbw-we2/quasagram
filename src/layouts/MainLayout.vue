@@ -6,7 +6,7 @@
     >
       <q-toolbar class="constrain">
         <q-btn
-          to="/camera"
+          to="/post"
           class="large-screen-only q-mr-sm"
           icon="eva-camera-outline"
           size="18px"
@@ -36,26 +36,26 @@
           vertical
         />
 
-        <q-btn v-if="!isLoggedIn"
-               to="/login"
-               class="large-screen-only"
-               dense
-               flat
-               icon="eva-log-in-outline"
-               round
-               title="Login"
+        <q-btn v-if="!isLoggedInData"
+         to="/login"
+         class="large-screen-only"
+         dense
+         flat
+         icon="eva-log-in-outline"
+         round
+         title="Login"
         />
         <q-btn v-if="!isRegistered"
-               to="/register"
-               class="large-screen-only"
-               dense
-               flat
-               icon="eva-person-add-outline"
-               round
-               title="Register"
+         to="/register"
+         class="large-screen-only"
+         dense
+         flat
+         icon="eva-person-add-outline"
+         round
+         title="Register"
         />
-        <q-btn v-if="isRegistered && isLoggedIn"
-          to="/login"
+        <q-btn v-if="isRegistered && isLoggedInData"
+          @click="logout"
           title="Logout"
           class="large-screen-only"
           dense
@@ -79,15 +79,15 @@
           icon="eva-home-outline"
         />
         <q-route-tab
-          to="/camera"
+          to="/post"
           icon="eva-camera-outline"
         />
       </q-tabs>
     </q-footer>
 
     <q-page-container class="bg-grey-1">
-      <router-view :userId="userId"
-        @user-logged-in="loginUser"
+      <router-view
+        @user-logged-in="isLoggedInData=true"
         @user-registered="isRegisteredData=true"/>
     </q-page-container>
   </q-layout>
@@ -95,13 +95,13 @@
 
 <script>
 import CONST from 'boot/constants'
+import {auth} from 'boot/firebase'
 
 export default {
   name: 'MainLayout',
 
   data() {
     return {
-      userId: null,
       isLoggedInData: false,
       isRegisteredData: false,
     }
@@ -119,9 +119,19 @@ export default {
     }
   },
   methods: {
-    loginUser(userId) {
-      this.userId = userId
-      this.isLoggedInData = true
+    logout() {
+      auth.signOut()
+        .then(() => {
+          this.$q.dialog({ title: 'Logged out', message: 'You logged out successfully' })
+          this.isLoggedInData = false
+          sessionStorage.setItem(CONST.LOGIN, false)
+          if (this.$router.currentRoute.path != '/')
+            this.$router.push('/')
+          else this.$router.go()
+        })
+        .catch((error) => {
+          this.$q.dialog({ title: error.code, message: error.message })
+        })
     }
   }
 }
