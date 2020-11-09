@@ -55,12 +55,13 @@
                title="Register"
         />
         <q-btn v-if="isRegistered && isLoggedIn"
-               title="Logout"
-               class="large-screen-only"
-               dense
-               flat
-               icon="eva-log-out-outline"
-               round
+          to="/login"
+          title="Logout"
+          class="large-screen-only"
+          dense
+          flat
+          icon="eva-log-out-outline"
+          round
         />
       </q-toolbar>
     </q-header>
@@ -85,8 +86,8 @@
     </q-footer>
 
     <q-page-container class="bg-grey-1">
-      <router-view
-        @user-logged-in="isLoggedInData=true"
+      <router-view :userId="userId"
+        @user-logged-in="loginUser"
         @user-registered="isRegisteredData=true"/>
     </q-page-container>
   </q-layout>
@@ -100,23 +101,29 @@ export default {
 
   data() {
     return {
+      userId: null,
       isLoggedInData: false,
       isRegisteredData: false,
     }
   },
-    computed: {
-      isRegistered: function() {
-        const registered = localStorage.getItem(CONST.REGISTERED)
-        const result = registered? JSON.parse(registered.toLowerCase()) : false
-        return this.isRegisteredData || result
-      },
-      isLoggedIn: function() {
-        const loggedIn = sessionStorage.getItem(CONST.LOGIN)
-        const result = loggedIn? JSON.parse(loggedIn.toLowerCase()) : false
-        return this.isLoggedInData || result
-      }
+  computed: {
+    isRegistered: function () {
+      const registered = localStorage.getItem(CONST.REGISTERED)
+      const result = registered ? JSON.parse(registered.toLowerCase()) : false
+      return this.isRegisteredData || result
+    },
+    isLoggedIn: function () {
+      const loggedIn = sessionStorage.getItem(CONST.LOGIN)
+      const result = loggedIn ? JSON.parse(loggedIn.toLowerCase()) : false
+      return this.isLoggedInData || result
     }
-
+  },
+  methods: {
+    loginUser(userId) {
+      this.userId = userId
+      this.isLoggedInData = true
+    }
+  }
 }
 </script>
 

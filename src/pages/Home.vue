@@ -81,7 +81,8 @@
           <q-item-section>
             <q-item-label class="text-bold">artingo</q-item-label>
             <q-item-label caption>
-              Fred Walther
+              Fred Walther<br/>
+              userId: {{userId}}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -97,6 +98,7 @@ import {db} from 'boot/firebase'
 
 export default {
   name: 'Home',
+  props: ['userId'],
   data() {
     return {
       posts: [],
@@ -120,7 +122,7 @@ export default {
   },
   filters: {
     niceDate(value) {
-      return date.formatDate(value, 'MMMM D h:mmA')
+      return date.formatDate(value, 'DD.MM.YYYY hh:mm')
     }
   },
   created() {
