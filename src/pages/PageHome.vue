@@ -26,10 +26,10 @@
               </q-item-section>
             </q-item>
 
-            <q-separator />
+            <q-separator/>
 
             <q-img height="50%"
-              :src="post.imageUrl"
+                   :src="post.imageUrl"
             />
 
             <q-card-section>
@@ -43,27 +43,27 @@
           <h5 class="text-center text-grey">No posts yet.</h5>
         </template>
         <template v-else>
-          <q-card  bordered>
+          <q-card bordered>
             <q-item>
               <q-item-section avatar>
-                <q-skeleton type="QAvatar" animation="fade" size="40px" />
+                <q-skeleton type="QAvatar" animation="fade" size="40px"/>
               </q-item-section>
 
               <q-item-section>
                 <q-item-label>
-                  <q-skeleton type="text" animation="fade" />
+                  <q-skeleton type="text" animation="fade"/>
                 </q-item-label>
                 <q-item-label caption>
-                  <q-skeleton type="text" animation="fade" />
+                  <q-skeleton type="text" animation="fade"/>
                 </q-item-label>
               </q-item-section>
             </q-item>
 
-            <q-skeleton height="200px" square animation="fade" />
+            <q-skeleton height="200px" square animation="fade"/>
 
             <q-card-section>
-              <q-skeleton type="text" class="text-subtitle2" animation="fade" />
-              <q-skeleton type="text" width="50%" class="text-subtitle2" animation="fade" />
+              <q-skeleton type="text" class="text-subtitle2" animation="fade"/>
+              <q-skeleton type="text" width="50%" class="text-subtitle2" animation="fade"/>
             </q-card-section>
           </q-card>
         </template>
@@ -73,7 +73,8 @@
         <q-item class="fixed">
           <q-item-section avatar>
             <q-avatar size="48px">
-              <img src="https://avatars3.githubusercontent.com/u/13683277?s=460&u=a90a4b666d907370d387e5af56a6c6c5e295ee2b&v=4">
+              <img
+                src="https://avatars3.githubusercontent.com/u/13683277?s=460&u=a90a4b666d907370d387e5af56a6c6c5e295ee2b&v=4">
             </q-avatar>
           </q-item-section>
 
@@ -91,7 +92,8 @@
 </template>
 
 <script>
-import { date } from 'quasar'
+import {date} from 'quasar'
+import $fb from 'boot/firebaseInit'
 
 export default {
   name: 'PageHome',
@@ -104,16 +106,19 @@ export default {
   methods: {
     getPosts() {
       this.loadingPosts = true
-      this.$axios.get('http://localhost:3000/posts').then(response => {
-        this.posts = response.data
+      $fb.db.collection('posts').orderBy('date', 'desc').get().then(snapshot => {
+        snapshot.forEach((doc) => {
+          this.posts.push(doc.data())
+        })
         this.loadingPosts = false
       }).catch(err => {
         this.$q.dialog({
           title: 'Error',
-          message: 'Could not find your location.'
+          message: err.message
         })
         this.loadingPosts = false
       })
+
     }
   },
   filters: {
@@ -128,7 +133,7 @@ export default {
 </script>
 
 <style lang="sass">
-  .card-post
-    .q-img
-      min-height: 200px
+.card-post
+  .q-img
+    min-height: 200px
 </style>
