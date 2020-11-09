@@ -96,7 +96,7 @@ import {date} from 'quasar'
 import {db} from 'boot/firebase'
 
 export default {
-  name: 'PageHome',
+  name: 'Home',
   data() {
     return {
       posts: [],
@@ -111,11 +111,8 @@ export default {
           this.posts.push(doc.data())
         })
         this.loadingPosts = false
-      }).catch(err => {
-        this.$q.dialog({
-          title: 'Error',
-          message: err.message
-        })
+      }).catch(error => {
+        this.$q.dialog({ title: error.code, message: error.message })
         this.loadingPosts = false
       })
 

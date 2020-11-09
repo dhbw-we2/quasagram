@@ -83,7 +83,7 @@ require('md-gum-polyfill')
 import {db, storage} from 'boot/firebase'
 
 export default {
-  name: 'PageCamera',
+  name: 'Camera',
   data() {
     return {
       post: {
@@ -225,9 +225,7 @@ export default {
       }).then(() => {
         this.$router.push('/')
         this.$q.notify({ message: 'Post created!', actions: [{ label: 'Dismiss', color: 'white' }] })
-
       }).catch(err => {
-        console.log('err: ', err)
         this.$q.dialog({ title: 'Error generating post', message: err.message })
       })
     }

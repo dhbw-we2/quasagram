@@ -24,19 +24,25 @@
         </q-toolbar-title>
         <q-btn
           to="/"
-          title="Login"
           class="large-screen-only"
-          icon="eva-log-in-outline"
-          size="18px"
+          icon="eva-home-outline"
           flat
           round
           dense
         />
-        <q-btn
-          to="/"
+        <q-btn v-if="!isRegistered"
+          to="/register"
+          title="Register"
           class="large-screen-only"
-          icon="eva-home-outline"
-          size="18px"
+          icon="eva-person-add-outline"
+          flat
+          round
+          dense
+        />
+        <q-btn v-else
+          title="Logout"
+          class="large-screen-only"
+          icon="eva-log-out-outline"
           flat
           round
           dense
@@ -70,12 +76,21 @@
 </template>
 
 <script>
+import CONST from 'boot/constants'
+
 export default {
   name: 'MainLayout',
 
   data() {
     return {}
+  },
+  computed: {
+    isRegistered: function() {
+      const registered = sessionStorage.getItem(CONST.REGISTERED)
+      return registered? JSON.parse(registered.toLowerCase()) : false
+    }
   }
+
 }
 </script>
 
