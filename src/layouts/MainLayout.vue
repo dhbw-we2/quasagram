@@ -1,34 +1,34 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header
-      class="bg-white text-grey-10"
       bordered
+      class="bg-white text-grey-10"
     >
       <q-toolbar class="constrain">
         <q-btn
-          to="/post"
           class="large-screen-only q-mr-sm"
-          icon="eva-camera-outline"
-          size="18px"
-          flat
-          round
           dense
+          flat
+          icon="eva-camera-outline"
+          round
+          size="18px"
+          to="/post"
         />
         <q-separator
           class="large-screen-only"
-          vertical
           spaced
+          vertical
         />
         <q-toolbar-title class="text-grand-hotel text-bold">
           Quasagram
         </q-toolbar-title>
         <q-btn
-          to="/"
           class="large-screen-only"
-          icon="eva-home-outline"
-          flat
-          round
           dense
+          flat
+          icon="eva-home-outline"
+          round
+          to="/"
         />
         <q-separator
           class="large-screen-only"
@@ -36,73 +36,73 @@
           vertical
         />
 
-        <q-btn v-if="!isLoggedInData"
-         to="/login"
-         class="large-screen-only"
-         dense
-         flat
-         icon="eva-log-in-outline"
-         round
-         title="Login"
+        <q-btn v-if="!isLoggedIn"
+               class="large-screen-only"
+               dense
+               flat
+               icon="eva-log-in-outline"
+               round
+               title="Login"
+               to="/login"
+        />
+        <q-btn v-else
+               class="large-screen-only"
+               dense
+               flat
+               icon="eva-log-out-outline"
+               round
+               title="Logout"
+               @click="logout"
         />
         <q-btn v-if="!isRegistered"
-         to="/register"
-         class="large-screen-only"
-         dense
-         flat
-         icon="eva-person-add-outline"
-         round
-         title="Register"
-        />
-        <q-btn v-if="isRegistered && isLoggedInData"
-          @click="logout"
-          title="Logout"
-          class="large-screen-only"
-          dense
-          flat
-          icon="eva-log-out-outline"
-          round
+               class="large-screen-only"
+               dense
+               flat
+               icon="eva-person-add-outline"
+               round
+               title="Register"
+               to="/register"
         />
       </q-toolbar>
     </q-header>
 
     <q-footer
-      class="bg-white small-screen-only"
-      bordered>
+      bordered
+      class="bg-white small-screen-only">
       <q-tabs
-        class="text-grey-10"
         active-color="primary"
+        class="text-grey-10"
         indicator-color="transparent"
       >
         <q-route-tab
-          to="/"
           icon="eva-home-outline"
+          to="/"
         />
         <q-route-tab
-          to="/post"
           icon="eva-camera-outline"
+          to="/post"
         />
       </q-tabs>
     </q-footer>
 
     <q-page-container class="bg-grey-1">
       <router-view
-        @user-logged-in="isLoggedInData=true"
-        @user-registered="isRegisteredData=true"/>
+        @user-logged-in="onLogin"
+      @user-registered="onRegister"/>
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
-import CONST from 'boot/constants'
-import {auth} from 'boot/firebase'
+import CONST from "boot/constants";
+import {auth, UID} from 'boot/firebase'
 
 export default {
   name: 'MainLayout',
 
   data() {
     return {
-      isLoggedInData: false,
+      isLoggedIn: false,
       isRegisteredData: false,
     }
   },
@@ -111,28 +111,34 @@ export default {
       const registered = localStorage.getItem(CONST.REGISTERED)
       const result = registered ? JSON.parse(registered.toLowerCase()) : false
       return this.isRegisteredData || result
-    },
-    isLoggedIn: function () {
-      const loggedIn = sessionStorage.getItem(CONST.LOGIN)
-      const result = loggedIn ? JSON.parse(loggedIn.toLowerCase()) : false
-      return this.isLoggedInData || result
     }
   },
   methods: {
     logout() {
       auth.signOut()
         .then(() => {
-          this.$q.dialog({ title: 'Logged out', message: 'You logged out successfully' })
-          this.isLoggedInData = false
-          sessionStorage.setItem(CONST.LOGIN, false)
-          if (this.$router.currentRoute.path != '/')
-            this.$router.push('/')
-          else this.$router.go()
+          this.$q.notify({message: 'You logged out successfully'})
+          setTimeout(() => {
+            this.isLoggedIn = false
+            if (this.$router.currentRoute.path != '/login')
+              this.$router.push('/login')
+          }, 1000)
         })
         .catch((error) => {
-          this.$q.dialog({ title: error.code, message: error.message })
+          this.$q.dialog({title: error.code, message: error.message})
         })
+    },
+    onLogin(newUID) {
+      if (newUID)
+        this.isLoggedIn = true
+    },
+    onRegister() {
+      this.isRegisteredData = true
     }
+
+  },
+  created() {
+    this.onLogin(UID)
   }
 }
 </script>
@@ -147,7 +153,7 @@ export default {
   @media (max-width: $breakpoint-xs-max)
     text-align: center
 
-.q-toolbar a
+.q-toolbar .q-btn
   font-size: 18px
 
 .q-footer

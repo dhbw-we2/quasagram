@@ -58,12 +58,9 @@ export default {
   methods: {
     login() {
       auth.signInWithEmailAndPassword(this.email, this.password).then(credentials => {
-        sessionStorage.setItem(CONST.LOGIN, true)
         this.$q.notify({message: 'User successfully logged in'})
         this.$emit(CONST.LOGIN, credentials.user.uid)
-        this.$router.push({
-          path: '/', params: {userId: credentials.user.uid}
-        })
+        this.$router.push({ path: '/' })
       }).catch(error => {
         this.$q.dialog({title: 'Error', message: error.message})
       })

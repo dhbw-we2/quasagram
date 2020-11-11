@@ -1,6 +1,5 @@
 <template>
   <q-page class="constrain q-pa-md">
-
     <div class="row q-col-gutter-lg">
       <div class="col-12 col-sm-8">
         <template v-if="!loadingPosts && posts.length">
@@ -69,12 +68,11 @@
         </template>
       </div>
 
-      <div class="col-4 large-screen-only">
+      <div v-show="user.image" class="col-4 large-screen-only">
         <q-item class="fixed">
           <q-item-section avatar>
             <q-avatar size="48px">
-              <img
-                src="https://avatars3.githubusercontent.com/u/13683277?s=460&u=a90a4b666d907370d387e5af56a6c6c5e295ee2b&v=4">
+              <img :src="user.image">
             </q-avatar>
           </q-item-section>
 
@@ -93,10 +91,11 @@
 
 <script>
 import {date} from 'quasar'
-import {db, auth} from 'boot/firebase'
+import {db, auth, UID} from 'boot/firebase'
 
 export default {
   name: 'Home',
+  props: ['uid'],
   data() {
     return {
       user: {},
@@ -106,13 +105,14 @@ export default {
   },
   methods: {
     getUser() {
-      if (!auth.currentUser) return
+      if (!UID) return
       db.collection('users')
-        .where('userId', '==', auth.currentUser.uid).limit(1).get()
+        .where('userId', '==', UID).limit(1).get()
         .then(snapshot => {
           if (!snapshot.empty) {
             this.user = snapshot.docs[0].data()
             this.user.email = auth.currentUser.email
+            this.user.image = 'https://avatars3.githubusercontent.com/u/13683277?s=460&u=a90a4b666d907370d387e5af56a6c6c5e295ee2b&v=4'
           }
         }).catch(error => {
         this.$q.dialog({ title: error.code, message: error.message })
@@ -120,7 +120,6 @@ export default {
 
     },
     getPosts() {
-      if (!auth.currentUser) return
       this.loadingPosts = true
       db.collection('posts').get()
         .then(posts => {
