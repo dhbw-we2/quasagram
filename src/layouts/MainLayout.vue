@@ -5,7 +5,7 @@
       class="bg-white text-grey-10"
     >
       <q-toolbar class="constrain">
-        <q-btn
+        <q-btn v-if="isLoggedIn"
           class="large-screen-only q-mr-sm"
           dense
           flat
@@ -78,9 +78,17 @@
           icon="eva-home-outline"
           to="/"
         />
-        <q-route-tab
+        <q-route-tab v-if="isLoggedIn"
           icon="eva-camera-outline"
           to="/post"
+        />
+        <q-route-tab v-else
+          icon="eva-log-in-outline"
+          to="/login"
+        />
+        <q-tab v-if="isLoggedIn"
+          icon="eva-log-out-outline"
+          @click="logout"
         />
       </q-tabs>
     </q-footer>

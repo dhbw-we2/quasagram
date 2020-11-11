@@ -111,8 +111,9 @@ export default {
         .then(snapshot => {
           if (!snapshot.empty) {
             this.user = snapshot.docs[0].data()
-            this.user.email = auth.currentUser.email
             this.user.image = 'https://avatars3.githubusercontent.com/u/13683277?s=460&u=a90a4b666d907370d387e5af56a6c6c5e295ee2b&v=4'
+            if (auth.currentUser)
+              this.user.email = auth.currentUser.email
           }
         }).catch(error => {
         this.$q.dialog({ title: error.code, message: error.message })
