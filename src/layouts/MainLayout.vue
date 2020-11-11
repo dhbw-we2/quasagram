@@ -93,11 +93,11 @@
       </q-tabs>
     </q-footer>
 
-    <q-page-container class="bg-grey-1">
-      <router-view
-        @user-logged-in="onLogin"
-      @user-registered="onRegister"/>
-    </q-page-container>
+      <q-page-container class="bg-image">
+        <router-view
+          @user-logged-in="onLogin"
+          @user-registered="onRegister"/>
+      </q-page-container>
   </q-layout>
 </template>
 
