@@ -1,6 +1,7 @@
 <template>
   <q-page class="constrain-more q-pa-md">
-    <div class="text-center q-pa-md">
+    <q-card class="shadow-10 text-center">
+      <div class="text-center q-pa-md">
       <h3 class="text-grand-hotel text-bold">Register new user</h3>
       <p class="text-body1">Please fill in the following fields<br/>
         to register a new Quasagram user</p>
@@ -55,6 +56,7 @@
         />
       </q-form>
     </div>
+    </q-card>
   </q-page>
 </template>
 

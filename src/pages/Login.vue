@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <div class="row justify-center">
+    <div class="row">
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-10 absolute-center">
         <q-card class="shadow-10 text-center">
           <q-card-section>
@@ -43,6 +43,7 @@
               :disable="!email||!password||password.length<6"
               color="primary"
               label="Login"
+              rounded
               @click="login()"
             />
           </q-card-actions>
@@ -70,7 +71,8 @@ export default {
       auth.signInWithEmailAndPassword(this.email, this.password).then(credentials => {
         this.$q.notify({message: 'User successfully logged in'})
         this.$emit(CONST.LOGIN, credentials.user.uid)
-        this.$router.push({path: '/'})
+        setTimeout(() => { this.$router.push({path: '/'}) }, 500)
+
       }).catch(error => {
         this.$q.dialog({title: 'Error', message: error.message})
       })
@@ -84,5 +86,5 @@ export default {
 }
 </script>
 
-<style lang="css">
+<style lang="sass">
 </style>

@@ -1,78 +1,80 @@
 <template>
   <q-page class="constrain-more q-pa-md">
-    <div class="camera-frame q-pa-md">
-      <video
-        v-show="!imageCaptured"
-        ref="video"
-        autoplay
-        class="full-width"
-      />
-      <canvas
-        v-show="imageCaptured"
-        ref="canvas"
-        class="full-width"
-        height="240"
-      />
-    </div>
-    <div class="text-center q-pa-md">
-      <q-btn v-if="hasCameraSupport"
-             :disable="imageCaptured"
-             color="grey-10"
-             icon="eva-camera"
-             round
-             size="lg"
-             @click="captureImage"
-      />
-      <q-file v-else
-              v-model="imageUpload"
-              accept="image/*"
-              label="Choose an image"
-              outlined
-              @input="captureImageFallback"
-      >
-        <template v-slot:prepend>
-          <q-icon name="eva-attach-outline"/>
-        </template>
-      </q-file>
-      <div class="row justify-center q-ma-md">
-        <q-input
-          v-model="post.caption"
-          class="col col-sm-6"
-          dense
-          label="Caption *"
+    <q-card class="shadow-10 text-center">
+      <div class="camera-frame q-pa-md">
+        <video
+          v-show="!imageCaptured"
+          ref="video"
+          autoplay
+          class="full-width"
+        />
+        <canvas
+          v-show="imageCaptured"
+          ref="canvas"
+          class="full-width"
+          height="240"
         />
       </div>
-      <div class="row justify-center q-ma-md">
-        <q-input
-          v-model="post.location"
-          :loading="locationLoading"
-          class="col col-sm-6"
-          dense
-          label="Location"
+      <div class="text-center q-pa-md">
+        <q-btn v-if="hasCameraSupport"
+               :disable="imageCaptured"
+               color="grey-10"
+               icon="eva-camera"
+               round
+               size="lg"
+               @click="captureImage"
+        />
+        <q-file v-else
+                v-model="imageUpload"
+                accept="image/*"
+                label="Choose an image"
+                outlined
+                @input="captureImageFallback"
         >
-          <template v-slot:append>
-            <q-btn
-              v-if="!locationLoading && locationSupported"
-              dense
-              flat
-              icon="eva-navigation-2-outline"
-              round
-              @click="getLocation"
-            />
+          <template v-slot:prepend>
+            <q-icon name="eva-attach-outline"/>
           </template>
-        </q-input>
+        </q-file>
+        <div class="row justify-center q-ma-md">
+          <q-input
+            v-model="post.caption"
+            class="col col-sm-6"
+            dense
+            label="Caption *"
+          />
+        </div>
+        <div class="row justify-center q-ma-md">
+          <q-input
+            v-model="post.location"
+            :loading="locationLoading"
+            class="col col-sm-6"
+            dense
+            label="Location"
+          >
+            <template v-slot:append>
+              <q-btn
+                v-if="!locationLoading && locationSupported"
+                dense
+                flat
+                icon="eva-navigation-2-outline"
+                round
+                @click="getLocation"
+              />
+            </template>
+          </q-input>
+        </div>
+        <div class="row justify-center q-mt-lg">
+          <q-btn
+            :disable="!post.caption || !post.photo"
+            color="primary"
+            label="Post Image"
+            rounded
+            unelevated
+            @click="uploadImage()"
+          />
+        </div>
       </div>
-      <div class="row justify-center q-mt-lg">
-        <q-btn
-          :disable="!post.caption || !post.photo"
-          color="primary"
-          label="Post Image"
-          rounded
-          unelevated
-          @click="uploadImage()"
-        />
-      </div>
-    </div>
+    </q-card>
   </q-page>
 </template>
 
@@ -254,6 +256,5 @@ export default {
 
 <style lang="sass">
 .camera-frame
-  border: 2px solid $grey-10
-  border-radius: 10px
+  border-radius: 20px
 </style>

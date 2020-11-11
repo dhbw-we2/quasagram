@@ -7,8 +7,7 @@
             v-for="post in posts"
             :key="post.id"
             bordered
-            class="card-post q-mb-md"
-            flat
+            class="shadow-10 card-post q-mb-md"
           >
             <q-item>
               <q-item-section avatar>
@@ -39,10 +38,18 @@
           </q-card>
         </template>
         <template v-else-if="!loadingPosts && !posts.length">
-          <h5 class="text-center text-grey">No posts yet.</h5>
+          <div class="absolute-center">
+            <q-card class="shadow-10">
+              <q-item>
+                <q-item-section>
+                  <h3 class="text-center text-grand-hotel text-bold">Login to see posts ...</h3>
+                </q-item-section>
+              </q-item>
+            </q-card>
+          </div>
         </template>
         <template v-else>
-          <q-card bordered>
+          <q-card class="shadow-10">
             <q-item>
               <q-item-section avatar>
                 <q-skeleton animation="fade" size="40px" type="QAvatar"/>
@@ -69,20 +76,23 @@
       </div>
 
       <div v-show="user.image" class="col-4 large-screen-only">
-        <q-item class="fixed">
-          <q-item-section avatar>
-            <q-avatar size="48px">
-              <img :src="user.image">
-            </q-avatar>
-          </q-item-section>
-
-          <q-item-section>
-            <q-item-label class="text-bold">{{ user.nickname }}</q-item-label>
-            <q-item-label caption>
-              {{user.email}}<br/>
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+        <q-card class="fixed">
+          <q-card-section avatar>
+            <q-item>
+              <q-item-section avatar>
+                <q-avatar>
+                  <img :src="user.image">
+                </q-avatar>
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="text-bold">{{ user.nickname }}</q-item-label>
+                <q-item-label caption>
+                  {{user.email}}<br/>
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-card-section>
+        </q-card>
       </div>
     </div>
 
@@ -121,6 +131,7 @@ export default {
 
     },
     getPosts() {
+      if (!UID) return
       this.loadingPosts = true
       db.collection('posts').get()
         .then(posts => {
