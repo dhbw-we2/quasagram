@@ -12,12 +12,12 @@
             <q-item>
               <q-item-section avatar>
                 <q-avatar>
-                  <img src="https://avatars3.githubusercontent.com/u/13683277">
+                  <q-img :src="user.image" />
                 </q-avatar>
               </q-item-section>
 
               <q-item-section>
-                <q-item-label class="text-bold">freddie_walker</q-item-label>
+                <q-item-label class="text-bold">{{post.userId}}</q-item-label>
                 <q-item-label caption>
                   {{ post.location }}
                 </q-item-label>
@@ -121,7 +121,7 @@ export default {
         .then(snapshot => {
           if (!snapshot.empty) {
             this.user = snapshot.docs[0].data()
-            this.user.image = 'https://avatars3.githubusercontent.com/u/13683277?s=460&u=a90a4b666d907370d387e5af56a6c6c5e295ee2b&v=4'
+            // this.user.image = 'https://avatars3.githubusercontent.com/u/13683277?s=460&u=a90a4b666d907370d387e5af56a6c6c5e295ee2b&v=4'
             if (auth.currentUser)
               this.user.email = auth.currentUser.email
           }
