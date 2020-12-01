@@ -1,9 +1,9 @@
 {
   "name": "quasagram",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "A Quasar Framework app",
   "productName": "Quasagram",
-  "author": "Danny Connell",
+  "author": "Alfred Walther-Weyland",
   "private": true,
   "scripts": {
     "test": "echo \"No test specified\" && exit 0"
@@ -21,8 +21,7 @@
   },
   "engines": {
     "node": ">= 10.18.1",
-    "npm": ">= 6.13.4",
-    "yarn": ">= 1.21.1"
+    "npm": ">= 6.13.4"
   },
   "browserslist": [
     "ie >= 11",

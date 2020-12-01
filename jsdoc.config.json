@@ -1,0 +1,19 @@
+{
+  "plugins": ["node_modules/jsdoc-vuejs"],
+  "source": {
+    "include": [ "src/pages/*" ],
+    "includePattern": "\\.(vue|js)$"
+  },
+  "sourceType": "module",
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": [
+      "jsdoc",
+      "closure"
+    ]
+  },
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false
+  }
+}

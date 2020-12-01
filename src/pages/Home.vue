@@ -2,7 +2,7 @@
   <q-page class="constrain q-pa-md">
     <div class="row q-col-gutter-lg">
       <div class="col-12 col-sm-8">
-        <template v-if="!loadingPosts && posts.length">
+        <template v-if="isLoggedIn && !loadingPosts && posts.length">
           <q-card
             v-for="post in posts"
             :key="post.id"
@@ -37,7 +37,7 @@
 
           </q-card>
         </template>
-        <template v-else-if="!loadingPosts && !posts.length">
+        <template v-else-if="!isLoggedIn">
           <div class="absolute-center">
             <q-card class="shadow-10">
               <q-item>
@@ -75,7 +75,7 @@
         </template>
       </div>
 
-      <div v-show="user.image" class="col-4 large-screen-only">
+      <div v-if="isLoggedIn" class="col-4 large-screen-only">
         <q-card class="fixed">
           <q-card-section avatar>
             <q-item>
@@ -105,7 +105,7 @@ import {db, auth, UID} from 'boot/firebase'
 
 export default {
   name: 'Home',
-  props: ['uid'],
+  props: ['isLoggedIn'],
   data() {
     return {
       user: {},
@@ -131,7 +131,10 @@ export default {
 
     },
     getPosts() {
-      if (!UID) return
+      if (!UID) {
+        this.posts = []
+        return
+      }
       this.loadingPosts = true
       db.collection('posts').get()
         .then(posts => {

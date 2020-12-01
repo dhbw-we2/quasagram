@@ -17,10 +17,7 @@ module.exports = function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/cli-documentation/boot-files
-    boot: [
-
-      'axios',
-    ],
+    boot: ['axios', 'firebase'],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
     css: [
@@ -44,7 +41,7 @@ module.exports = function (/* ctx */) {
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
       vueRouterMode: 'history', // available values: 'hash', 'history'
-
+      distDir: 'public',
       // Add dependencies for transpiling with Babel (Array of regexes)
       // (from node_modules, which are by default not transpiled).
       // Does not applies to modern builds.

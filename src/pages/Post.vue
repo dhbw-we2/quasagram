@@ -221,7 +221,7 @@ export default {
       this.$q.loading.hide()
     },
     createPost(file, post) {
-      db.collection('posts').doc(post.id).set({
+      db.collection('posts').doc().set({
         id: post.id,
         caption: post.caption,
         location: post.location,

@@ -4,7 +4,7 @@ node_modules
 
 # Quasar core related directories
 .quasar
-/dist
+/public
 
 # Cordova related directories and files
 /src-cordova/node_modules
@@ -33,4 +33,5 @@ yarn-error.log*
 *.sln
 
 # don't commit secret key!
+/.firebase/
 /src/boot/secretConfig.json

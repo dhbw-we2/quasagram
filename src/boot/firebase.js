@@ -24,4 +24,4 @@ function findUserId() {
     }
 }
 
-export {db, auth, storage, UID}
+export {db, auth, storage, UID, findUserId}

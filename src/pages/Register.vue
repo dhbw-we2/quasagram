@@ -9,6 +9,7 @@
                 class="q-gutter-y-md col-md-6"
                 @reset="onReset">
           <q-uploader
+            ref="uploader"
             :factory="uploadImage"
             accept="image/*"
             auto-upload
@@ -16,7 +17,6 @@
             color="info"
             label="Choose a profile image"
             max-file-size="204800"
-            ref="uploader"
           />
           <q-input
             v-model="nickname"
@@ -63,8 +63,8 @@
           />
           <q-btn color="primary" flat label="Reset" rounded type="reset"/>
           &nbsp;
-          <!--            :disable="step<4"-->
           <q-btn
+            :disable="step<4"
             color="primary"
             label="Register new user"
             rounded
@@ -95,6 +95,7 @@ export default {
     }
   },
   methods: {
+
     uploadImage(files) {
       this.$q.loading.show()
       this.image = files[0]
@@ -103,10 +104,12 @@ export default {
         this.imageUrl = await snapshot.ref.getDownloadURL()
       }).catch(error => {
         this.$q.dialog({title: 'Error uploading profile image', message: error.message})
-      }).finally(() => this.$q.loading.hide())
+      }).finally(this.$q.loading.hide())
     },
     registerUser() {
       auth.createUserWithEmailAndPassword(this.email, this.password).then(async userCredentials => {
+        // TODO: set displayName, photoUrl, etc.
+        // userCredentials.user
         this.createUser(userCredentials.user.uid)
       }).catch(error => {
         this.$q.dialog({title: 'Error registering user', message: error.message})
@@ -124,6 +127,7 @@ export default {
           localStorage.setItem(CONST.REGISTERED, true)
           this.$q.dialog({title: 'Success', message: 'User registered'})
           this.$emit(CONST.REGISTERED)
+          this.$emit(CONST.LOGIN)
           this.$router.push('/')
         }).catch(error => {
           this.$q.dialog({title: 'Error generating user data', message: error.message})
@@ -133,6 +137,8 @@ export default {
       }
     },
     onReset() {
+
+      // TODO: delete image on firestore
       this.$refs.uploader.reset()
       this.nickname = null
       this.email = null
