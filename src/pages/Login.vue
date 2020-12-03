@@ -57,28 +57,46 @@
 import CONST from 'boot/constants'
 import {auth} from 'boot/firebase'
 
+/**
+ * Login page to sign in a registered user on Firebase
+ */
 export default {
-  name: 'Register',
+  name: 'Login',
   data() {
     return {
+      /** Toggles visibility of password field */
       isPwd: true,
+      /** User's email address */
       email: null,
+      /** User's password */
       password: null
     }
   },
   methods: {
+    /**
+     * Firebase sign-in with email & password and forward to start page
+     * @emits user-logged-in
+     * @property {string} uid - the user's UniqueID
+     */
     login() {
       auth.signInWithEmailAndPassword(this.email, this.password).then(credentials => {
         this.$q.notify({message: 'User successfully logged in'})
         this.$emit(CONST.LOGIN, credentials.user.uid)
+        // waits 500ms to allow MainLayout to react to login-event
         setTimeout(() => { this.$router.push({path: '/'}) }, 500)
 
       }).catch(error => {
         this.$q.dialog({title: 'Error', message: error.message})
       })
     },
-    rulePwd(pwd) {
-      if (!pwd || pwd.length < 6) {
+
+    /**
+     * Validation rule for password: minimum of 6 characters
+     * @param {string} password - password entered by user
+     * @returns {string} error message
+     */
+    rulePwd(password) {
+      if (!password || password.length < 6) {
         return 'Enter at least 6 characters'
       }
     }

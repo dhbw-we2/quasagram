@@ -1,7 +1,6 @@
 # Quasagram
 This is an instagram-like demo application developed during the lecture "Web Engineering 2" at the State University of Baden-Wuerttemberg in Karlsruhe, Germany.
 
-
 ## Install app dependencies
 ```bash
 npm install
@@ -16,3 +15,5 @@ quasar dev
 ```bash
 quasar build
 ```
+Try this app on Firebase:
+https://quasagram-dhbw.web.app

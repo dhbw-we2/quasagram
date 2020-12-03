@@ -103,17 +103,32 @@
 import {date} from 'quasar'
 import {db, auth, UID} from 'boot/firebase'
 
+/**
+ * Homepage displaying all current postings
+ */
 export default {
   name: 'Home',
+  /**
+   * Shows current user details if logged in
+   */
   props: ['isLoggedIn'],
   data() {
     return {
+      /**
+       * Container for Firebase user data
+       * @see {@link https://firebase.google.com/docs/auth/web/start |Firebase authentication}
+       */
       user: {},
+      /** Array to store visible posts*/
       posts: [],
+      /** Flag to show wait animation */
       loadingPosts: false
     }
   },
   methods: {
+    /**
+     * Loads current user from Firestore 'users' collection
+     */
     getUser() {
       if (!UID) return
       db.collection('users')
@@ -121,7 +136,6 @@ export default {
         .then(snapshot => {
           if (!snapshot.empty) {
             this.user = snapshot.docs[0].data()
-            // this.user.image = 'https://avatars3.githubusercontent.com/u/13683277?s=460&u=a90a4b666d907370d387e5af56a6c6c5e295ee2b&v=4'
             if (auth.currentUser)
               this.user.email = auth.currentUser.email
           }
@@ -130,6 +144,10 @@ export default {
       })
 
     },
+
+    /**
+     * Loads all posts from 'posts' collection
+     */
     getPosts() {
       if (!UID) {
         this.posts = []
@@ -151,6 +169,11 @@ export default {
     }
   },
   filters: {
+    /**
+     * Formats posting date
+     * @param {Date} value
+     * @returns {string}
+     */
     niceDate(value) {
       return date.formatDate(value, 'DD.MM.YYYY hh:mm')
     }

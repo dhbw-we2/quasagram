@@ -1,7 +1,7 @@
 {
   "name": "quasagram",
-  "version": "1.0.0",
-  "description": "A Quasar Framework app",
+  "version": "1.0.20",
+  "description": "An instagram-like app built with Quasar",
   "productName": "Quasagram",
   "author": "Alfred Walther-Weyland",
   "private": true,

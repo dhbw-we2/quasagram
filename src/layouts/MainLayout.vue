@@ -6,13 +6,13 @@
     >
       <q-toolbar class="constrain">
         <q-btn v-if="isLoggedIn"
-          class="large-screen-only q-mr-sm"
-          dense
-          flat
-          icon="eva-camera-outline"
-          round
-          size="18px"
-          to="/post"
+               class="large-screen-only q-mr-sm"
+               dense
+               flat
+               icon="eva-camera-outline"
+               round
+               size="18px"
+               to="/post"
         />
         <q-separator
           class="large-screen-only"
@@ -79,25 +79,26 @@
           to="/"
         />
         <q-route-tab v-if="isLoggedIn"
-          icon="eva-camera-outline"
-          to="/post"
+                     icon="eva-camera-outline"
+                     to="/post"
         />
         <q-route-tab v-else
-          icon="eva-log-in-outline"
-          to="/login"
+                     icon="eva-log-in-outline"
+                     to="/login"
         />
         <q-tab v-if="isLoggedIn"
-          icon="eva-log-out-outline"
-          @click="logout"
+               icon="eva-log-out-outline"
+               @click="logout"
         />
       </q-tabs>
     </q-footer>
 
-      <q-page-container class="bg-image">
-        <router-view
-          @user-logged-in="onLogin"
-          @user-registered="onRegister"/>
-      </q-page-container>
+    <q-page-container class="bg-image">
+      <router-view
+        :isLoggedIn="isLoggedIn"
+        @user-logged-in="onLogin"
+        @user-registered="onRegister"/>
+    </q-page-container>
   </q-layout>
 </template>
 
@@ -105,16 +106,27 @@
 import CONST from "boot/constants";
 import {auth, UID} from 'boot/firebase'
 
+/**
+ * Defines the layout of this Single Page Application
+ * @see {@link https://quasar.dev/layout-builder |Layout Builder}
+ * @author Alfred Walther-Weyland <coach@artingo.net>
+ * @version 1.0.20
+ */
 export default {
   name: 'MainLayout',
-
   data() {
     return {
+      /** Toggles visibility of nav buttons */
       isLoggedIn: false,
+      /** Toggles visibility of register button */
       isRegisteredData: false,
     }
   },
   computed: {
+    /**
+     * Checks localStorage if user is already registered
+     * @returns {boolean}
+     */
     isRegistered: function () {
       const registered = localStorage.getItem(CONST.REGISTERED)
       const result = registered ? JSON.parse(registered.toLowerCase()) : false
@@ -122,12 +134,16 @@ export default {
     }
   },
   methods: {
+    /**
+     * Signs the user out of Firebase and forwards to login page
+     */
     logout() {
       auth.signOut()
         .then(() => {
           this.$q.notify({message: 'You logged out successfully'})
+          this.isLoggedIn = false
+          // timeout was needed because of cache side effects!
           setTimeout(() => {
-            this.isLoggedIn = false
             if (this.$router.currentRoute.path != '/login')
               this.$router.push('/login')
           }, 1000)
@@ -136,14 +152,24 @@ export default {
           this.$q.dialog({title: error.code, message: error.message})
         })
     },
+
+    /**
+     * Is triggered by 'user-logged-in' event on login page
+     * @param {string} newUID
+     * @listens user-logged-in
+     */
     onLogin(newUID) {
       if (newUID)
         this.isLoggedIn = true
     },
+
+    /**
+     * Is triggered by 'user-registered' event on register page
+     * @listens user-registered
+     */
     onRegister() {
       this.isRegisteredData = true
     }
-
   },
   created() {
     this.onLogin(UID)

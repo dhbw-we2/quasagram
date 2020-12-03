@@ -84,10 +84,14 @@ import {uid} from 'quasar'
 require('md-gum-polyfill')
 import {db, auth, storage} from 'boot/firebase'
 
+/**
+ * Page to create a new photo posting
+ */
 export default {
   name: 'Camera',
   data() {
     return {
+      /** object containing current posting */
       post: {
         id: uid(),
         caption: '',
@@ -95,19 +99,34 @@ export default {
         photo: null,
         date: Date.now()
       },
+      /** flag to check if image was captured by device camera */
       imageCaptured: false,
+      /**
+       * container for current photo snapshot
+       * @type {File[]}
+       * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/File |File API}
+       */
       imageUpload: [],
+      /** flag to check if user device has a camera */
       hasCameraSupport: true,
+      /** flag to display a wait icon while user location is loading */
       locationLoading: false
     }
   },
   computed: {
+    /**
+     * Checks if user device has GPS support
+     * @returns {boolean} geolocationSupport
+     */
     locationSupported() {
       if ('geolocation' in navigator) return true
       return false
     }
   },
   methods: {
+    /**
+     * Streams live stream to 'video' element
+     */
     initCamera() {
       navigator.mediaDevices.getUserMedia({
         video: true
@@ -117,6 +136,11 @@ export default {
         this.hasCameraSupport = false
       })
     },
+
+    /**
+     * Captures an image from the camera and draws it on canvas
+     * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/canvas |Canvas}
+     */
     captureImage() {
       let video = this.$refs.video
       let canvas = this.$refs.canvas
@@ -128,6 +152,12 @@ export default {
       this.post.photo = this.dataURItoBlob(canvas.toDataURL())
       this.disableCamera()
     },
+
+    /**
+     * Draws an uploaded file on canvas
+     * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/FileReader |FileReader}
+     * @param {File} file
+     */
     captureImageFallback(file) {
       this.post.photo = file
 
@@ -147,6 +177,10 @@ export default {
       }
       reader.readAsDataURL(file)
     },
+
+    /**
+     * Stops all video tracks/streams
+     */
     disableCamera() {
       if (this.$refs.video.srcObject) {
         this.$refs.video.srcObject.getVideoTracks().forEach(track => {
@@ -154,6 +188,13 @@ export default {
         })
       }
     },
+
+    /**
+     * Converts a base64 encoded image to a Blob
+     * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Blob |Blob}
+     * @param dataURI
+     * @returns {Blob} imagePixels
+     */
     dataURItoBlob(dataURI) {
       // convert base64 to raw binary data held in a string
       // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
@@ -178,6 +219,12 @@ export default {
       return blob;
 
     },
+
+
+    /**
+     * Triggers native position tracking
+     * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition |Geolocation}
+     */
     getLocation() {
       this.locationLoading = true
       navigator.geolocation.getCurrentPosition(position => {
@@ -186,6 +233,13 @@ export default {
         this.locationError()
       }, {timeout: 7000})
     },
+
+    /**
+     * Calls webservice to identify current city
+     * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/GeolocationPosition |GeolocationPosition}
+     * @see {@link https://geocode.xyz |Geocoding service}
+     * @param {GeolocationPosition} position
+     */
     getCityAndCountry(position) {
       let apiUrl = `https://geocode.xyz/${position.coords.latitude},${position.coords.longitude}?json=1`
       this.$axios.get(apiUrl).then(result => {
@@ -194,6 +248,12 @@ export default {
         this.locationError()
       })
     },
+
+    /**
+     * Fills post.city & country from GeoCode result
+     * @param {JSON} result
+     * @see {@link https://geocode.xyz/api | GeoCode API}
+     */
     locationSuccess(result) {
       this.post.location = result.data.city
       if (result.data.country) {
@@ -201,6 +261,10 @@ export default {
       }
       this.locationLoading = false
     },
+
+    /**
+     * Shows an error message if geolocation can't be parsed
+     */
     locationError() {
       this.$q.dialog({
         title: 'Error',
@@ -208,6 +272,10 @@ export default {
       })
       this.locationLoading = false
     },
+
+    /**
+     * Uploads the selected image to Firestorage
+     */
     uploadImage() {
       if (!auth.currentUser) return
       this.$q.loading.show()
@@ -220,14 +288,20 @@ export default {
       })
       this.$q.loading.hide()
     },
-    createPost(file, post) {
+
+    /**
+     * Creates a new doc in 'posts' collection
+     * @param {URL} imageURL - image URL on Firebase storage
+     * @param {Object} post - the new user posting
+     */
+    createPost(imageURL, post) {
       db.collection('posts').doc().set({
         id: post.id,
         caption: post.caption,
         location: post.location,
         date: parseInt(post.date),
         userId: auth.currentUser.uid,
-        imageUrl: `https://firebasestorage.googleapis.com/v0/b/${file.bucket}/o/${encodeURIComponent(file.path)}?alt=media&token=${post.id}`
+        imageUrl: `https://firebasestorage.googleapis.com/v0/b/${imageURL.bucket}/o/${encodeURIComponent(imageURL.path)}?alt=media&token=${post.id}`
       }).then(() => {
         this.$router.push('/')
         this.$q.notify({message: 'Post created!', actions: [{label: 'Dismiss', color: 'white'}]})
@@ -236,6 +310,10 @@ export default {
       })
     }
   },
+
+  /**
+   * If user isn't authorized, shows an error message and redirects to start page
+   */
   mounted() {
     if (!auth.currentUser) {
       this.$q.dialog({title: 'Unauthorized', message: 'Your are not logged in'})
@@ -246,6 +324,10 @@ export default {
     }
     this.initCamera()
   },
+
+  /**
+   * Disables the device camera before leaving this page
+   */
   beforeDestroy() {
     if (this.hasCameraSupport) {
       this.disableCamera()

@@ -80,22 +80,41 @@
 import CONST from 'boot/constants'
 import {db, auth, storage} from 'boot/firebase'
 
+/**
+ * Page to register a new user on Firebase
+ */
 export default {
   name: 'Register',
   data() {
     return {
+      /** Validation steps 1 to 4 */
       step: 0,
+      /** Toggles visibility of password field */
       isPwd: true,
+      /**
+       * Placeholder for user profile image
+       * @type {File}
+       * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/File |File API}
+       */
       image: null,
+      /** Firestore url of profile image */
       imageUrl: null,
+      /** User nickname, must be unique */
       nickname: null,
+      /** User email address */
       email: null,
+      /** User password */
       password: null,
+      /** Repeated password, to avoid typos */
       passwordRepeat: null
     }
   },
   methods: {
-
+    /**
+     * Uploads selected user image to Firestore and stores url in 'imageUrl'
+     * @param {File[]} files - Array of Files selected by user
+     * @see 'imageUrl' for further information
+     */
     uploadImage(files) {
       this.$q.loading.show()
       this.image = files[0]
@@ -106,15 +125,25 @@ export default {
         this.$q.dialog({title: 'Error uploading profile image', message: error.message})
       }).finally(this.$q.loading.hide())
     },
+
+    /**
+     * Creates a new user on Firebase Authentication
+     */
     registerUser() {
       auth.createUserWithEmailAndPassword(this.email, this.password).then(async userCredentials => {
         // TODO: set displayName, photoUrl, etc.
-        // userCredentials.user
         this.createUser(userCredentials.user.uid)
       }).catch(error => {
         this.$q.dialog({title: 'Error registering user', message: error.message})
       })
     },
+
+    /**
+     * Creates a new user document in Firestore
+     * @async waits for userId lookup in 'users' collection
+     * @param {string} userId - the userId returned by Firebase Authentication
+     * @returns {Promise<void>}
+     */
     async createUser(userId) {
       const userRef = await db.collection('users').where('userId', '==', userId).get()
       if (userRef.empty) {
@@ -136,8 +165,11 @@ export default {
         this.$q.dialog({title: 'Error', message: 'User already exists'})
       }
     },
-    onReset() {
 
+    /**
+     * Resets the register form
+     */
+    onReset() {
       // TODO: delete image on firestore
       this.$refs.uploader.reset()
       this.nickname = null
@@ -145,6 +177,13 @@ export default {
       this.password = null
       this.passwordRepeat = null
     },
+
+    /**
+     * Checks if this nickname already exists on Firestore
+     * @async waits for nickname lookup in 'users' collection
+     * @param {string} nickname - a unique user nickname
+     * @returns {Promise<string>} errorMessage
+     */
     async ruleNickname(nickname) {
       if (!nickname) return 'Please enter a nickname...'
       const search = nickname.toLowerCase()
@@ -155,6 +194,12 @@ export default {
       }
       this.step = 1
     },
+
+    /**
+     * Checks if email field has a valid format
+     * @param {string} email
+     * @returns {string} errorMessage
+     */
     ruleEmail(email) {
       const emailPattern = /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/
       if (!emailPattern.test(email)) {
@@ -163,18 +208,29 @@ export default {
       }
       this.step = 2
     },
-    rulePwd(pwd) {
-      if (!pwd || pwd.length < 6) {
+
+    /**
+     * Checks if password contains at least 6 characters
+     * @param {string} password
+     * @returns {string} errorMessage
+     */
+    rulePwd(password) {
+      if (!password || password.length < 6) {
         this.step = 2
         return 'Enter at least 6 characters'
       }
       this.step = 3
     },
-    rulePwdRepeat(pwd) {
-      if (!pwd || pwd != this.password) {
+
+    /**
+     * Checks if user repeated the password correctly
+     * @param {string} passwordRepeat
+     * @returns {string} errorMessage
+     */
+    rulePwdRepeat(passwordRepeat) {
+      if (!passwordRepeat || passwordRepeat != this.password) {
         this.step = 3
         return 'Passwords must match'
-
       }
       this.step = 4
     }
